@@ -12,35 +12,54 @@ branches:
 # Override default install.
 install: autoreconf --install
 
+# Define the test anchor
+test: &test
+  stage: test
+  script:
+    - ./configure
+    - make
+    - make check
+
+# Define the tarball anchor
+tarball: &tarball
+  stage: tarball
+  script:
+    - ./configure
+    - make
+    - make dist
+    - mv edutils-*.tar.gz ~
+    - cd
+    - tar -xzf edutils-*.tar.gz
+    - cd edutils-*
+    - ./configure
+    - make
+    - make check
+
 # Configure job stages.
 jobs:
   include:
-    - stage: test
-      compiler:
-        - clang
-        - gcc
-      os:
-        - linux
-        - osx
-      script:
-        - ./configure
-        - make
-        - make check
-    - stage: tarball
-      compiler:
-        - clang
-        - gcc
-      os:
-        - linux
-        - osx
-      script:
-        - ./configure
-        - make
-        - make dist
-        - mv edutils-*.tar.gz ~
-        - cd
-        - tar -xzf edutils-*.tar.gz
-        - cd edutils-*
-        - ./configure
-        - make
-        - make check
+    - <<: *test
+      compiler: clang
+      os: linux
+    - <<: *test
+      compiler: gcc
+      os: linux
+    - <<: *test
+      compiler: clang
+      os: macos
+    - <<: *test
+      compiler: gcc
+      os: macos
+
+    - <<: *tarball
+      compiler: clang
+      os: linux
+    - <<: *tarball
+      compiler: gcc
+      os: linux
+    - <<: *tarball
+      compiler: clang
+      os: macos
+    - <<: *tarball
+      compiler: gcc
+      os: macos
