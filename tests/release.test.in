@@ -16,14 +16,14 @@ srcdir="@abs_srcdir@/release"
 bindir="@abs_top_builddir@/src"
 
 # check that required files exist with correct permissions
-try test -r $srcdir/funcs
+try test -r $srcdir/tests
 try test -x $depdir/shunit2/shunit2
 
 # HACK: req'd since shunit2 does not appear to find dynamically created
 # functions.
 suite() {
   # load test functions
-  . $srcdir/funcs
+  . $srcdir/tests
 }
 
 # initiate the test runner

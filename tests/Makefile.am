@@ -1,5 +1,5 @@
 # Do not install.
-check_SCRIPTS = test-release
+check_SCRIPTS = release.test
 CLEANFILES = $(check_SCRIPTS)
 
 # Added scripts to list of tests to run.
