@@ -1,0 +1,35 @@
+#!/bin/bash
+
+# correct permissions on language directory
+chmod go= $base/lang
+
+# dynamically generate a function for each test in lang
+for l in $base/lang/* ; do
+  lang=`basename $l`
+
+  for level in prelab lab solution ; do
+    sol=$l/unit-$level.sol
+
+    cat <<EOF >> $runner
+test-release-$lang-$level() {
+  # create an output file
+  local out=\`mktemp\`
+
+  # execute release
+  $bin/release --$level --suffix=.$lang $l
+
+  # recursively query file permissions
+  ls -laRF $l | awk '{if (NF>2) print \$1,\$NF}' > \$out
+
+  # compute the diff with the known solution
+  local res=\`diff $sol \$out\`
+
+  # make sure that they are the same
+  assertEquals "X" "X\$res"
+
+  # remove output file on success
+  [ -z "\$res" ] && rm -f \$out
+}
+EOF
+  done
+done

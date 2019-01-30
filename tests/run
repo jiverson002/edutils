@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# get path to the project root directory
+root="$( cd "$(dirname "$0")/.." ; pwd -P )"
+
+# get path to bin directory
+bin="$root/bin"
+
+# get path to test directory (contains this script)
+tests="$root/tests"
+
+# create a temporary test runner
+runner=`mktemp`
+
+# dynamically generate a function for each test in t/
+for base in $tests/* ; do
+  # only consider directories
+  [ -d $base ] && . $base/funcs
+done
+
+# append the run line to the test runner
+echo . $root/dep/shunit2/shunit2 >> $runner
+
+# give the test runner executable permissions
+chmod u+x $runner
+
+# execute the test runner and remove it if all tests passed
+($runner && rm $runner) || (echo $runner && false)

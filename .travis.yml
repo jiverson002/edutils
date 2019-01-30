@@ -1,0 +1,18 @@
+# Tell Travis the project language.
+language: c
+
+# Route to the container-based infrastructure for a faster build.
+sudo: false
+
+# Branch whitelist.
+branches:
+  only:
+    - master
+
+# Choose operating systems.
+os:
+  - linux
+  - osx
+
+# Override default script.
+script: ./configure && make && make check

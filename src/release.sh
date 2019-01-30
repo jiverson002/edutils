@@ -1,0 +1,120 @@
+#!/bin/bash
+
+################################################################################
+# MIT License
+#
+# Copyright (c) 2019 Jeremy Iverson
+# 
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+# 
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+# 
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+################################################################################
+
+MAJOR=0
+MINOR=0
+PATCH=1
+
+# TODO: Make --dry-run output before and after permission on each file,
+# essentially like chmod verbose, but without applying the permission changes
+
+# Function to process a command
+proc() {
+  ($dry && echo $@) || $@
+}
+
+# release type enum
+pre=0 lab=1 sol=2
+# default level is lab release, so students can access the lab directory
+# contents, but not the solution source files
+(( rel=lab ))
+
+# --dry-run: toggle dry-run
+dry=false
+
+# --verbose: control the verbosity level
+verbose=""
+
+# --suffix: list of suffixes in solution directory that will not have read
+# permission
+suffix=(.java .java~)
+
+# list of paths to release
+paths=()
+
+i=0
+for arg in "$@" ; do
+  case $arg in
+    --dry-run)
+    dry=true
+    ;;
+
+    --prelab)
+    (( rel=pre ))
+    ;;
+
+    --lab)
+    (( rel=lab ))
+    ;;
+
+    --solution)
+    (( rel=sol ))
+    ;;
+
+    --suffix=*)
+    read -d ',' -a suffix <<< "${arg:9}"
+    ;;
+
+    --verbose)
+    v="vv"
+    ;;
+
+    --version)
+    echo "release version ${MAJOR}.${MINOR}.${PATCH} (`git rev-parse --short HEAD`)"
+    echo "Copyright (c) 2019 Jeremy Iverson"
+    exit 0
+    ;;
+
+    *)
+    paths[$i]="$arg"
+    (( ++i ))
+    ;;
+  esac
+done
+
+for f in "${paths[@]}" ; do
+  # STEP 1: temporarily set top-level directory permissions to ***r-s---
+  proc chmod -f$v g=rxs,o= "$f"
+
+  # STEP 2: recursively give contained files ***r-Xr-X permissions and
+  # directories ***r-sr-x permissions
+  proc chmod -fR$v go=,g+rX,o+rX "$f/"*
+  proc find "$f/"* -type d -exec chmod -f$v g+s {} \; # prevents files from getting g+s
+
+  # STEP 3: if this is a pre-release or lab release, remove read permission
+  # granted to others in STEP 2 from all .<suffix> files in solution directory
+  if [ -d "$f/solution" ] && [[ rel -lt sol ]] ; then
+    for s in "${suffix[@]}" ; do
+      proc chmod -fR$v o-r "$f/solution/"*$s
+    done
+  fi
+
+  # STEP 4: if this is a lab release or solution release, add read and execute
+  # permissions to those granted to others in STEP 1
+  if [[ rel -gt pre ]] ; then
+    proc chmod -f$v o+rx "$f"
+  fi
+done
