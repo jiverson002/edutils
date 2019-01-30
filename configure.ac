@@ -4,6 +4,7 @@ AM_INIT_AUTOMAKE([-Wall -Werror])
 
 AC_CONFIG_FILES([
   Makefile
+  dep/Makefile
   src/Makefile
   tests/Makefile
 ])

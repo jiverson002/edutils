@@ -1,6 +1,11 @@
 #!/bin/bash
 # @configure_input@
 
+# https://stackoverflow.com/questions/1378274/in-a-bash-script-how-can-i-exit-the-entire-script-if-a-certain-condition-occurs
+yell() { echo "$0: $*" >&2; }
+die() { yell "$*"; exit 1; }
+try() { "$@" || die "cannot $*"; }
+
 # get path to the project root directory
 srcdir="@abs_top_srcdir@"
 
@@ -10,6 +15,10 @@ testsdir="@abs_builddir@"
 # get path to the release dir
 progdir=$srcdir/tests/release
 
+# check that required files exist with correct permissions
+try test -r $progdir/funcs
+try test -x $srcdir/dep/shunit2/shunit2
+
 # HACK: req'd since shunit2 does not appear to find dynamically created
 # functions.
 suite() {
@@ -17,6 +26,5 @@ suite() {
   . $progdir/funcs
 }
 
-# append the run line to the test runner
-#echo . $srcdir/dep/shunit2/shunit2 >> $runner
+# initiate the test runner
 . $srcdir/dep/shunit2/shunit2

@@ -24,3 +24,15 @@ install: autoreconf --install
 
 # Override default script.
 script: ./configure && make && make check
+
+jobs:
+  include:
+    - stage: dist
+      before_script:
+        - ./configure
+        - make
+        - make dist
+        - mv edutils-*.tar.gz ~
+        - cd
+        - tar -xzf edutils-*.tar.gz
+        - cd edutil-*
