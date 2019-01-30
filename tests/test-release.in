@@ -1,0 +1,22 @@
+#!/bin/bash
+# @configure_input@
+
+# get path to the project root directory
+srcdir="@abs_top_srcdir@"
+
+# get path to test directory (contains this script)
+testsdir="@abs_builddir@"
+
+# get path to the release dir
+progdir=$srcdir/tests/release
+
+# HACK: req'd since shunit2 does not appear to find dynamically created
+# functions.
+suite() {
+  # load test functions
+  . $progdir/funcs
+}
+
+# append the run line to the test runner
+#echo . $srcdir/dep/shunit2/shunit2 >> $runner
+. $srcdir/dep/shunit2/shunit2

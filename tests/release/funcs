@@ -1,23 +1,24 @@
 #!/bin/bash
 
 # correct permissions on language directory
-chmod go= $base/lang
+chmod go= $progdir/lang
 
 # dynamically generate a function for each test in lang
-for l in $base/lang/* ; do
+for l in $progdir/lang/* ; do
   lang=`basename $l`
 
   for level in prelab lab solution ; do
     sol=$l/unit-$level.sol
 
-    cat <<EOF >> $runner
-test-release-$lang-$level() {
+    # dynamically create a new test function
+    . /dev/stdin <<EOF
+test-$lang-$level() {
   # create an output file
-  local out=\`mktemp\`
+  local out=\$(mktemp)
   assertTrue \$?
 
   # execute release
-  $bin/release --$level --suffix=.$lang $l
+  $srcdir/src/release --$level --suffix=.$lang $l
   assertTrue \$?
 
   # recursively query file permissions
@@ -33,5 +34,8 @@ test-release-$lang-$level() {
   true
 }
 EOF
+
+    # add the new function to the test suite
+    suite_addTest test-$lang-$level
   done
 done

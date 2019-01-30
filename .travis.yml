@@ -14,5 +14,13 @@ os:
   - linux
   - osx
 
+# Choose compilers.
+compiler:
+  - clang
+  - gcc
+
+# Override default install.
+install: autoreconf --install
+
 # Override default script.
 script: ./configure && make && make check
