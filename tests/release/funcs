@@ -1,14 +1,14 @@
 #!/bin/bash
 
 # correct permissions on language directory
-chmod go= $progdir/lang
+chmod go= $srcdir/lang
 
 # dynamically generate a function for each test in lang
-for l in $progdir/lang/* ; do
-  lang=`basename $l`
+for langdir in $srcdir/lang/* ; do
+  lang=$(basename $langdir)
 
   for level in prelab lab solution ; do
-    sol=$l/unit-$level.sol
+    sol=$langdir/unit-$level.sol
 
     # dynamically create a new test function
     . /dev/stdin <<EOF
@@ -18,11 +18,11 @@ test-$lang-$level() {
   assertTrue \$?
 
   # execute release
-  $srcdir/src/release --$level --suffix=.$lang $l
+  $bindir/release --$level --suffix=.$lang $langdir
   assertTrue \$?
 
   # recursively query file permissions
-  ls -laRF $l | awk '{if (NF>2) print \$1,\$NF}' > \$out
+  ls -laRF $langdir | awk '{if (NF>2) print \$1,\$NF}' > \$out
   assertTrue \$?
 
   # compute the diff with the known solution

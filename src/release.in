@@ -1,4 +1,5 @@
 #!/bin/bash
+# @configure_input@
 
 ################################################################################
 # MIT License
@@ -23,10 +24,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 ################################################################################
-
-MAJOR=0
-MINOR=0
-PATCH=1
 
 # TODO: Make --dry-run output before and after permission on each file,
 # essentially like chmod verbose, but without applying the permission changes
@@ -83,9 +80,9 @@ for arg in "$@" ; do
     ;;
 
     --version)
-    echo "release version ${MAJOR}.${MINOR}.${PATCH} (`git rev-parse --short HEAD`)"
+    echo "release (@PACKAGE_NAME@) @PACKAGE_VERSION@"
     echo "Copyright (c) 2019 Jeremy Iverson"
-    exit 0
+    exit
     ;;
 
     *)

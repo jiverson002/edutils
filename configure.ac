@@ -8,6 +8,7 @@ AC_CONFIG_FILES([
   src/Makefile
   tests/Makefile
 ])
+AC_CONFIG_FILES([src/release], [chmod +x src/release])
 AC_CONFIG_FILES([tests/test-release], [chmod +x tests/test-release])
 
 AC_OUTPUT

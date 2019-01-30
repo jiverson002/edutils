@@ -6,25 +6,25 @@ yell() { echo "$0: $*" >&2; }
 die() { yell "$*"; exit 1; }
 try() { "$@" || die "cannot $*"; }
 
-# get path to the project root directory
-srcdir="@abs_top_srcdir@"
+# get path to the project dep directory
+depdir="@abs_top_srcdir@/dep"
 
-# get path to test directory (contains this script)
-testsdir="@abs_builddir@"
+# get path to release source directory
+srcdir="@abs_srcdir@/release"
 
-# get path to the release dir
-progdir=$srcdir/tests/release
+# get path to release bin directory
+bindir="@abs_top_builddir@/src"
 
 # check that required files exist with correct permissions
-try test -r $progdir/funcs
-try test -x $srcdir/dep/shunit2/shunit2
+try test -r $srcdir/funcs
+try test -x $depdir/shunit2/shunit2
 
 # HACK: req'd since shunit2 does not appear to find dynamically created
 # functions.
 suite() {
   # load test functions
-  . $progdir/funcs
+  . $srcdir/funcs
 }
 
 # initiate the test runner
-. $srcdir/dep/shunit2/shunit2
+. $depdir/shunit2/shunit2
