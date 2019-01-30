@@ -46,10 +46,10 @@ jobs:
       os: linux
     - <<: *test
       compiler: clang
-      os: macos
+      os: osx
     - <<: *test
       compiler: gcc
-      os: macos
+      os: osx
 
     - <<: *tarball
       compiler: clang
@@ -59,7 +59,7 @@ jobs:
       os: linux
     - <<: *tarball
       compiler: clang
-      os: macos
+      os: osx
     - <<: *tarball
       compiler: gcc
-      os: macos
+      os: osx
