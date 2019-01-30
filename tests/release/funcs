@@ -14,21 +14,23 @@ for l in $base/lang/* ; do
 test-release-$lang-$level() {
   # create an output file
   local out=\`mktemp\`
+  assertTrue \$?
 
   # execute release
   $bin/release --$level --suffix=.$lang $l
+  assertTrue \$?
 
   # recursively query file permissions
   ls -laRF $l | awk '{if (NF>2) print \$1,\$NF}' > \$out
+  assertTrue \$?
 
   # compute the diff with the known solution
-  local res=\`diff $sol \$out\`
+  diff $sol \$out
+  assertTrue \$?
 
-  # make sure that they are the same
-  assertEquals "X" "X\$res"
-
-  # remove output file on success
-  [ -z "\$res" ] && rm -f \$out
+  # HACK: req'd so that shunit2 does not report an error because the funtion
+  # returned a non-zero code.
+  true
 }
 EOF
   done

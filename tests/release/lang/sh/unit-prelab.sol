@@ -1,0 +1,10 @@
+drwxr-s--- ./
+drwx------ ../
+-rwxr-xr-x code.sh*
+drwxr-sr-x solution/
+-rw-r--r-- unit-lab.sol
+-rw-r--r-- unit-prelab.sol
+-rw-r--r-- unit-solution.sol
+drwxr-sr-x ./
+drwxr-s--- ../
+-rwxr-x--x solution.sh*
