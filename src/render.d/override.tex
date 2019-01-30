@@ -1,0 +1,155 @@
+\usepackage{enumitem}
+
+\usepackage{algorithm2e}
+\usepackage{tabularx}
+\usepackage{multicol}
+\renewcommand{\arraystretch}{2}
+
+\usepackage{tikz}
+\usetikzlibrary{decorations.pathreplacing,positioning,snakes}
+
+\usepackage[margin=1in]{geometry}
+
+\usepackage{unicode-math}
+\setmainfont
+[ Extension = .otf,
+  UprightFont = *-regular,
+  BoldFont = *-bold,
+  ItalicFont = *-italic,
+  BoldItalicFont = *-bolditalic,
+]{xits}
+
+\setmathfont
+[ Extension = .otf,
+  BoldFont = *bold,
+]{xits-math}
+
+\let\oldrule=\rule
+\renewcommand{\rule}[1]{\oldrule{\linewidth}}
+
+\definecolor{DarkOrange}{HTML}{D77F00}
+
+\usepackage{framed}
+
+% Environment for code snippets
+\ifdefined\Shaded
+  \makeatletter
+  \renewenvironment{Shaded}[1][\hsize]
+  {%
+    \vspace{.75\baselineskip}%
+    \def\FrameCommand
+    {%
+      {\color{lightgray}\vrule width 8pt}%
+      \hspace{0pt}%must no space.
+      \fboxsep=\FrameSep\fcolorbox{lightgray}{white}%
+    }%
+    \MakeFramed{%
+      \hsize#1\advance\hsize-\width%
+      \@totalleftmargin=-\itemindent%
+      \FrameRestore%
+    }%
+  }%
+  {\endMakeFramed}%
+  \makeatother
+
+  \renewcommand{\CommentTok}[1]{\textcolor[RGB]{0,128,0}{#1}}
+  \renewcommand{\KeywordTok}[1]{\textcolor[RGB]{0,0,255}{#1}}
+  \renewcommand{\StringTok}[1]{\textcolor[RGB]{163,21,21}{#1}}
+  \renewcommand{\BuiltInTok}[1]{\textcolor[RGB]{43,145,175}{#1}}
+\fi
+
+% Environment for rubrics specs
+\makeatletter
+\newenvironment{Rubric}[1][\hsize]
+{%
+  \color{blue}%
+  \vspace{.75\baselineskip}%
+  \def\FrameCommand%
+  {%
+    {\color{blue}\vrule width 8pt}%
+    \hspace{0pt}%must no space.
+    \fboxsep=\FrameSep\fcolorbox{blue}{white}%
+  }%
+  \MakeFramed{%
+    \hsize#1\advance\hsize-\width%
+    \@totalleftmargin=-\itemindent%
+    \FrameRestore%
+  }%
+  %\renewcommand{\labelitemi}{$\square$}%
+  \setitemize{label=$\square$}
+}%
+{\endMakeFramed}%
+\makeatother
+
+% Environment for alert messages
+\makeatletter
+\newenvironment{Alert}[1][\hsize]
+{%
+  \color{DarkOrange}%
+  \vspace{.75\baselineskip}%
+  \def\FrameCommand
+  {%
+    {%
+      \color{DarkOrange}\vrule width 8pt}%
+      \hspace{0pt}%must no space.
+      \fboxsep=\FrameSep\fcolorbox{DarkOrange}{white}%
+    }%
+  \MakeFramed{%
+    \hsize#1\advance\hsize-\width%
+    \@totalleftmargin=-\itemindent%
+    \FrameRestore%
+  }%
+}%
+{\endMakeFramed}%
+\makeatother
+
+% Environment for warning messages
+\makeatletter
+\newenvironment{Warning}[1][\hsize]
+{%
+  \color{BrickRed}%
+  \vspace{.75\baselineskip}%
+  \def\FrameCommand
+  {%
+    {%
+      \color{BrickRed}\vrule width 8pt}%
+      \hspace{0pt}%must no space.
+      \fboxsep=\FrameSep\fcolorbox{BrickRed}{white}%
+    }%
+  \MakeFramed{%
+    \hsize#1\advance\hsize-\width%
+    \@totalleftmargin=-\itemindent%
+    \FrameRestore%
+  }%
+}%
+{\endMakeFramed}%
+\makeatother
+
+% Environment for submission messages
+\makeatletter
+\newenvironment{Submission}[1][\hsize]
+{%
+  \color{OliveGreen}%
+  \vspace{.75\baselineskip}%
+  \def\FrameCommand
+  {%
+    {%
+      \color{OliveGreen}\vrule width 8pt}%
+      \hspace{0pt}%must no space.
+      \fboxsep=\FrameSep\fcolorbox{OliveGreen}{white}%
+    }%
+  \MakeFramed{%
+    \hsize#1\advance\hsize-\width%
+    \@totalleftmargin=-\itemindent%
+    \FrameRestore%
+  }%
+}%
+{\endMakeFramed}%
+\makeatother
+
+\let\BEGIN\begin
+\let\END\end
+
+\usepackage{titling}
+\posttitle{\par\end{center}\vspace{-50pt}}
+\setlength{\droptitle}{-60pt}

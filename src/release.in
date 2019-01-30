@@ -81,7 +81,7 @@ for arg in "$@" ; do
 
     --version)
     echo "release (@PACKAGE_NAME@) @PACKAGE_VERSION@"
-    echo "Copyright (c) 2019 Jeremy Iverson"
+    echo "Copyright (c) @PACKAGE_COPYRIGHT@ Jeremy Iverson"
     exit
     ;;
 

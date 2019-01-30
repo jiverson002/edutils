@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE language SYSTEM "language.dtd">
+<language name="VB.NET" section="Sources"
+          version="0" kateversion="5.0"
+          extensions="*.vb"
+          mimetype="text/x-vbnet-src">
+  <highlighting>
+    <list name="keywords">
+      <item>Option</item>
+      <item>Explicit</item>
+      <item>On</item>
+      <item>Private</item>
+      <item>Sub</item>
+      <item>End</item>
+      <item>Dim</item>
+      <item>As</item>
+      <item>Integer</item>
+      <item>Byte</item>
+      <item>Float</item>
+      <item>String</item>
+      <item>ByVal</item>
+      <item>Handles</item>
+      <item>Object</item>
+      <item>If</item>
+      <item>Then</item>
+      <item>Like</item>
+      <item>Return</item>
+      <item>For</item>
+      <item>To</item>
+      <item>Next</item>
+    </list>
+    <list name="builtins">
+      <item>EventArgs</item>
+      <item>MessageBox</item>
+      <item>OpenMode</item>
+      <item>OpenAccess</item>
+      <item>Array</item>
+    </list>
+    <contexts>
+      <context attribute="Normal Text" lineEndContext="#stay" name="Normal">
+        <DetectSpaces />
+        <StringDetect attribute="Keyword" context="PublicClass" String="Public Class" />
+        <StringDetect attribute="Keyword" context="#stay" String="End Class" />
+        <keyword attribute="Keyword" context="#stay" String="keywords"/>
+        <keyword attribute="Built In" context="#stay" String="builtins"/>
+        <DetectChar attribute="String" context="String" char="&quot;"/>
+        <DetectChar attribute="Comment" context="Comment" char="'"/>
+        <DetectIdentifier />
+        <AnyChar attribute="Symbol" context="#stay" String=":!%&amp;()+,-/.*&lt;=&gt;?[]|~^&#59;"/>
+      </context>
+
+      <context attribute="Keyword" lineEndContext="#pop" name="PublicClass">
+        <RegExpr attribute="ClassName" context="#pop" String="\s+.*" />
+      </context>
+
+      <context attribute="String" lineEndContext="#pop" name="String">
+        <LineContinue attribute="String" context="#stay"/>
+        <DetectChar attribute="String" context="#pop" char="&quot;"/>
+      </context>
+
+      <context attribute="Comment" lineEndContext="#pop" name="Comment">
+        <LineContinue attribute="Comment" context="#stay"/>
+      </context>
+    </contexts>
+    <itemDatas>
+      <itemData name="Normal Text"  defStyleNum="dsNormal" spellChecking="false"/>
+      <itemData name="Keyword"      defStyleNum="dsKeyword" spellChecking="false"/>
+      <itemData name="Built In"     defStyleNum="dsBuiltIn" spellChecking="false"/>
+      <itemData name="Float"        defStyleNum="dsFloat" spellChecking="false"/>
+      <itemData name="Char"         defStyleNum="dsChar" spellChecking="false"/>
+      <itemData name="String"       defStyleNum="dsString"/>
+      <itemData name="String Char"  defStyleNum="dsSpecialChar"/>
+      <itemData name="Comment"      defStyleNum="dsComment"/>
+      <itemData name="ClassName"    defStyleNum="dsBuiltIn"/>
+    </itemDatas>
+  </highlighting>
+</language>
