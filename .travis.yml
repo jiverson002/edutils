@@ -16,6 +16,13 @@ addons:
     casks:
       - mactex
 
+# Configure caching of Homebrew packages.
+cache:
+  directories:
+    - $HOME/Library/Caches/Homebrew
+before_cache:
+    - brew cleanup
+
 # Branch whitelist.
 branches:
   only:

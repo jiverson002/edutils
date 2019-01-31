@@ -33,7 +33,9 @@ AC_ARG_VAR([XELATEX], [Path to the xelatex executable])
 dnl check if XELATEX is set
 AM_CONDITIONAL([HAVE_XELATEX], [test -n "$XELATEX"])
 dnl if not, search for xelatex executable
-AM_COND_IF([HAVE_XELATEX],, [AC_PATH_PROG([XELATEX], [xelatex])])
+AM_COND_IF([HAVE_XELATEX],,[
+  AC_PATH_PROG([XELATEX], [xelatex],, [$PATH:/Library/TeX/texbin])
+])
 dnl retest
 AM_CONDITIONAL([HAVE_XELATEX], [test -n "$XELATEX"])
 
