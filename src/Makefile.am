@@ -1,5 +1,8 @@
 # Install in $(bindir) and distribute.
-dist_bin_SCRIPTS = release render
+dist_bin_SCRIPTS = release
+EXTRA_DIST =
 
-# These are files/dirs that must be distributed in order to build other scripts
-EXTRA_DIST = render.d
+if RENDER
+	dist_bin_SCRIPTS += render
+	EXTRA_DIST += render.d
+endif

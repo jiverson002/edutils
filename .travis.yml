@@ -4,6 +4,18 @@ language: c
 # Route to the container-based infrastructure for a faster build.
 sudo: false
 
+# Install dependencies.
+addons:
+  apt:
+    packages:
+      - pandoc
+      - texlive-xetex
+  homebrew:
+    packages:
+      - pandoc
+    casks:
+      - mactex
+
 # Branch whitelist.
 branches:
   only:
