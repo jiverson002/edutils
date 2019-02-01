@@ -18,7 +18,7 @@ addons:
 
 # Configure caching of Homebrew packages.
 before_cache:
-    - [[ "$TRAVIS_OS_NAME" == "osx" ]] && brew cleanup
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]] ; then brew cleanup ; fi
 cache:
   directories:
     - $HOME/Library/Caches/Homebrew
@@ -38,7 +38,7 @@ compiler:
   - clang
   - gcc
 
-# HACK: Set the PATH environment variable for osx runs
+# HACK: Update the PATH environment variable for osx runs
 env:
   -
   - PATH=$PATH:/Library/TeX/texbin
@@ -46,10 +46,10 @@ env:
 # HACK: fix up the build matrix
 matrix:
   exclude:
-    # Exclude linux jobs where PATH is set
+    # Exclude linux jobs where PATH is updated
     - os: linux
       env: PATH=$PATH:/Library/TeX/texbin
-    # Exclude osx jobs where PATH is not set
+    # Exclude osx jobs where PATH is not updated
     - os: osx
       env:
 
