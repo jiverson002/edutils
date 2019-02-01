@@ -17,11 +17,11 @@ addons:
       - mactex
 
 # Configure caching of Homebrew packages.
+before_cache:
+    - [[ "$TRAVIS_OS_NAME" == "osx" ]] && brew cleanup
 cache:
   directories:
     - $HOME/Library/Caches/Homebrew
-before_cache:
-    - brew cleanup
 
 # Branch whitelist.
 branches:
@@ -38,8 +38,25 @@ compiler:
   - clang
   - gcc
 
+# HACK: Set the PATH environment variable for osx runs
+env:
+  -
+  - PATH=$PATH:/Library/TeX/texbin
+
+# HACK: fix up the build matrix
+matrix:
+  exclude:
+    # Exclude linux jobs where PATH is set
+    - os: linux
+      env: PATH=$PATH:/Library/TeX/texbin
+    # Exclude osx jobs where PATH is not set
+    - os: osx
+      env:
+
 # Override default install.
-install: autoreconf --install
+install:
+  - autoreconf --install
 
 # Override default script.
-script: ./configure && make && make distcheck
+script:
+  - ./configure && make && make distcheck
