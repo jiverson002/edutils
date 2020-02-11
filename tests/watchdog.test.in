@@ -1,0 +1,33 @@
+#!/bin/bash
+# @configure_input@
+
+# https://stackoverflow.com/questions/1378274/in-a-bash-script-how-can-i-exit-the-entire-script-if-a-certain-condition-occurs
+yell() { echo "$0: $*" >&2; }
+die() { yell "$*"; exit 1; }
+try() { "$@" || die "cannot $*"; }
+
+# get path to the project dep directory
+depdir="@abs_top_srcdir@/dep"
+
+# get path to watchdog source directory
+srcdir="@abs_srcdir@/watchdog"
+
+# get path to watchdog test directory
+testdir="@abs_top_builddir@/tests"
+
+# get path to watchdog bin directory
+bindir="@abs_top_builddir@/src"
+
+# check that required files exist with correct permissions
+try test -r $srcdir/tests
+try test -x $depdir/shunit2/shunit2
+
+# HACK: req'd since shunit2 does not appear to find dynamically created
+# functions.
+suite() {
+  # load test functions
+  . $srcdir/tests
+}
+
+# initiate the test runner
+. $depdir/shunit2/shunit2

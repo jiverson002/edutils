@@ -1,0 +1,135 @@
+#!/usr/bin/env ruby
+# @configure_input@
+
+################################################################################
+# MIT License
+#
+# Copyright (c) 2019 Jeremy Iverson
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+################################################################################
+
+# frozen_string_literal: true
+
+require 'fileutils'
+require 'yaml'
+
+# Monkey patch so that +X behaves correctly, i.e., execute/search permission is
+# affected only if the file is a directory or already had execute permission.
+module FileUtils
+ def symbolic_modes_to_i(mode_sym, path)  #:nodoc:
+    mode = if File::Stat === path
+             path.mode
+           else
+             File.stat(path).mode
+           end
+    mode_sym.split(/,/).inject(mode & 07777) do |current_mode, clause|
+      target, *actions = clause.split(/([=+-])/)
+      raise ArgumentError, "invalid file mode: #{mode_sym}" if actions.empty?
+      target = 'a' if target.empty?
+      user_mask = user_mask(target)
+      actions.each_slice(2) do |op, perm|
+        need_apply = op == '='
+        mode_mask = (perm || '').each_char.inject(0) do |mask, chr|
+          case chr
+          when "r"
+            mask | 0444
+          when "w"
+            mask | 0222
+          when "x"
+            mask | 0111
+          when "X"
+            if FileTest.directory?(path) || (current_mode & 00111) > 0
+              mask | 0111
+            else
+              mask
+            end
+          when "s"
+            mask | 06000
+          when "t"
+            mask | 01000
+          when "u", "g", "o"
+            if mask.nonzero?
+              current_mode = apply_mask(current_mode, user_mask, op, mask)
+            end
+            need_apply = false
+            copy_mask = user_mask(chr)
+            (current_mode & copy_mask) / (copy_mask & 0111) * (user_mask & 0111)
+          else
+            raise ArgumentError, "invalid `perm' symbol in file mode: #{chr}"
+          end
+        end
+
+        if mode_mask.nonzero? || need_apply
+          current_mode = apply_mask(current_mode, user_mask, op, mode_mask)
+        end
+      end
+      current_mode
+    end
+  end
+  private_module_function :symbolic_modes_to_i
+end
+
+def now
+  @now ||= Time.now
+end
+
+def reserved
+  ['anchors', 'group', 'user', 'version']
+end
+
+def is_reserved?(key)
+  reserved.include?(key)
+end
+
+def process(config, fullpath = '')
+  # Get the latest policy for this /fullpath/ that is no later than now
+  time, perms = config.select do |k, _|
+    k.is_a?(Time) && k <= now
+  end.max
+
+  # Verify that there is a policy for this /fullpath/ that can be applied
+  unless time.nil?
+    # Apply policy for this /fullpath/
+    Dir.glob(fullpath) do |file|
+      FileUtils.chown_R(config['user'], config['group'], file, :verbose => true)
+      FileUtils.chmod_R(perms, file, :verbose => true)
+    end
+  end
+
+  # Filter out keys that are reserved words or those that have values which are
+  # not hashes
+  clean = config.select do |k, v|
+    !is_reserved?(k) && v.is_a?(Hash)
+  end
+
+  # Process any sub-paths
+  clean.each do |path, nconfig|
+    # Propagate configurations for reserved words to sub-paths
+    reserved.each do |k|
+      nconfig[k] ||= config[k]
+    end
+
+    # Recurse to sub-paths
+    process(nconfig, "#{fullpath}#{path}")
+  end
+end
+
+# Start processing
+process(YAML.load_file(ARGV[0]))

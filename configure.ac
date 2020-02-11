@@ -26,6 +26,17 @@ AM_COND_IF([HAVE_PANDOC],, [AC_PATH_PROG([PANDOC], [pandoc])])
 dnl retest
 AM_CONDITIONAL([HAVE_PANDOC], [test -n "$PANDOC"])
 
+dnl ######
+dnl ruby
+dnl ######
+AC_ARG_VAR([RUBY], [Path to the ruby executable])
+dnl check if RUBY is set
+AM_CONDITIONAL([HAVE_RUBY], [test -n "$RUBY"])
+dnl if not, search for ruby executable
+AM_COND_IF([HAVE_RUBY],, [AC_PATH_PROG([RUBY], [ruby])])
+dnl retest
+AM_CONDITIONAL([HAVE_RUBY], [test -n "$RUBY"])
+
 dnl #######
 dnl xelatex
 dnl #######
@@ -46,6 +57,13 @@ dnl release
 dnl #######
 AC_CONFIG_FILES([src/release], [chmod +x src/release])
 AC_CONFIG_FILES([tests/release.test], [chmod +x tests/release.test])
+
+dnl #############
+dnl release.sched
+dnl #############
+AC_CONFIG_FILES([src/watchdog], [chmod +x src/watchdog])
+AC_CONFIG_FILES([tests/watchdog.test], [chmod +x tests/watchdog.test])
+AC_CONFIG_FILES([tests/watchdog/_watchdog.yml])
 
 dnl ######
 dnl render
