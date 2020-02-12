@@ -57,5 +57,5 @@ script:
   - mkdir build
   - cd build
   - cmake ../
-  - cmake --build ../
-  - ctest ../
+  - cmake --build ./
+  - ctest ./
