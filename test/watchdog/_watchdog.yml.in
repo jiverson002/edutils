@@ -2,7 +2,7 @@ anchors:
   non: &non go=,g+r,a+X
   all: &all go=,g+r,o+r,a+X
 
-@abs_srcdir@/lang/:
+@CMAKE_CURRENT_BINARY_DIR@/lang/:
   java/:
     1971-01-01T00:00:00-06:00: *non
     2000-01-01T00:00:00-06:00: *all

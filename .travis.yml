@@ -53,10 +53,9 @@ matrix:
     - os: osx
       env:
 
-# Override default install.
-install:
-  - autoreconf --install
-
-# Override default script.
 script:
-  - ./configure && make && make distcheck
+  - mkdir build
+  - cd build
+  - cmake ../
+  - cmake --build ../
+  - ctest ../
