@@ -18,14 +18,14 @@ bindir="@CMAKE_SOURCE_DIR@/src"
 builddir="@CMAKE_CURRENT_BINARY_DIR@/watchdog"
 
 # check that required files exist with correct permissions
-try test -r $srcdir/tests
+try test -r $builddir/tests
 try test -x $depdir/shunit2/shunit2
 
 # HACK: req'd since shunit2 does not appear to find dynamically created
 # functions.
 suite() {
   # load test functions
-  . $srcdir/tests
+  . $builddir/tests
 }
 
 # initiate the test runner

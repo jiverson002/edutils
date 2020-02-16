@@ -37,3 +37,11 @@ EOF
   # add the new function to the test suite
   suite_addTest test-$lang
 done
+
+if [ -z "@RUBOCOP_EXE@" ] ; then
+  test-rubocop() {
+    @RUBOCOP_EXE@ $bindir/watchdog
+  }
+
+  suite_addTest test-rubocop
+fi

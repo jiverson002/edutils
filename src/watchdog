@@ -72,17 +72,12 @@ end
 class Policy
   include Comparable
 
-  attr_reader :time
-
   def initialize(time, mode)
     @time = time
     case mode
     when Hash
       @dir      = mode['dir']
       @file     = mode['file']
-      @group    = mode['group']
-      @excludes = mode['excludes']
-      @includes = mode['includes']
     when String
       @dir  = mode
       @file = mode
@@ -100,6 +95,10 @@ class Policy
   def mode(fullpath)
     File.directory?(fullpath) ? dir : file
   end
+
+  protected
+
+  attr_reader :time
 
   private
 
@@ -138,77 +137,63 @@ class Path
   attr_reader :fullpath
 
   def mode
-    p = policy.max
-    p = policy.min if excluded? || !p.valid?
-    p.mode(fullpath)
+    (excluded? || !policy.max.valid? ? policy.min : policy.max).mode(fullpath)
   end
 
   def group
-    return @group unless @group.nil?
+    @group ||= @config.delete('group') || @parent&.group || ''
+  end
 
-    @group = @config.delete('group') || @parent&.group || ''
+  def policy
+    @policy ||= if @config['mode']
+                  [Policy.new(Time.at(0), @config.delete('mode'))]
+                else
+                  @parent&.policy.clone || []
+                end.tap do |list|
+                  list.concat(@config.map do |k, v|
+                    Policy.new(k, v) if k.is_a?(Time)
+                  end.compact)
+                end
+  end
+
+  def excludes
+    @excludes ||= (@parent&.excludes.clone || []).tap do |list|
+      list.concat(@config.delete('exclude')&.map do |e|
+        Dir.glob(File.join(fullpath, e))
+      end&.flatten || [])
+    end
+  end
+
+  def includes
+    @includes ||= (@parent&.includes.clone || []).tap do |list|
+      list.concat(@config.delete('include')&.map do |i|
+        Dir.glob(File.join(fullpath, i))
+      end&.flatten || [])
+    end
+  end
+
+  private
+
+  def path
+    @path ||= @config.map do |k, v|
+      Path.new(v, File.join(fullpath, k), self) if k.is_a?(String)
+    end.compact
+  end
+
+  def children
+    @children ||= dir_children(fullpath).map do |c|
+      cpath = File.join(fullpath, c)
+      Path.new(@config, cpath, self) unless path?(cpath)
+    end.compact
   end
 
   def dir_children(fullpath)
     Dir.exist?(fullpath) ? Dir.children(fullpath) : []
   end
 
-  def children
-    return @children unless @children.nil?
-
-    @children = dir_children(fullpath).map do |c|
-      cpath = File.join(fullpath, c)
-      Path.new(@config, cpath, self) unless path?(cpath)
-    end.compact
-  end
-
   def path?(fullpath)
     path.any? { |p| p.fullpath.eql?(fullpath) }
   end
-
-  def path
-    return @path unless @path.nil?
-
-    @path = @config.map do |k, v|
-      Path.new(v, File.join(fullpath, k), self) if k.is_a?(String)
-    end.compact
-  end
-
-  def policy
-    return @policy unless @policy.nil?
-
-    @policy = if @config['mode']
-                [Policy.new(Time.at(0), @config.delete('mode'))]
-              else
-                @parent&.policy.clone || []
-              end
-
-    @policy.concat(@config.map do |k, v|
-      Policy.new(k, v) if k.is_a?(Time)
-    end.compact)
-  end
-
-  def excludes
-    return @excludes unless @excludes.nil?
-
-    @excludes = @parent&.excludes.clone || []
-
-    @excludes.concat(@config.delete('exclude')&.map do |e|
-      Dir.glob(File.join(fullpath, e))
-    end&.flatten || [])
-  end
-
-  def includes
-    return @includes unless @includes.nil?
-
-    @includes = @parent&.includes.clone || []
-
-    @includes.concat(@config.delete('include')&.map do |i|
-      Dir.glob(File.join(fullpath, i))
-    end&.flatten || [])
-  end
-
-  private
 
   def excluded?
     excludes.include?(fullpath) && !included?
@@ -221,7 +206,7 @@ end
 
 # Start processing
 begin
-  Path.new(YAML.load_file(ARGV[0] + '/_watchdog.yml')).apply
+  Path.new(YAML.load_file(File.join(ARGV[0], '_watchdog.yml'))).apply
 rescue ArgumentError => e
   puts e.message
 rescue Errno::ENOENT => e
