@@ -1,35 +1,11 @@
 #!/usr/bin/env ruby
-# @configure_input@
-
-################################################################################
-# MIT License
-#
-# Copyright (c) 2019 Jeremy Iverson
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
-################################################################################
 
 # frozen_string_literal: true
 
 require 'fileutils'
 require 'yaml'
 
+# rubocop:disable all
 # Monkey patch so that +X behaves correctly, i.e., execute/search permission is
 # affected only if the file is a directory or already had execute permission.
 module FileUtils
@@ -85,51 +61,169 @@ module FileUtils
   end
   private_module_function :symbolic_modes_to_i
 end
+# rubocop:enable all
 
+# ...
 def now
   @now ||= Time.now
 end
 
-def reserved
-  ['anchors', 'group', 'user', 'version']
-end
+# Policy class
+class Policy
+  include Comparable
 
-def is_reserved?(key)
-  reserved.include?(key)
-end
+  attr_reader :time
 
-def process(config, fullpath = '')
-  # Get the latest policy for this /fullpath/ that is no later than now
-  time, perms = config.select do |k, _|
-    k.is_a?(Time) && k <= now
-  end.max
-
-  # Verify that there is a policy for this /fullpath/ that can be applied
-  unless time.nil?
-    # Apply policy for this /fullpath/
-    Dir.glob(fullpath) do |file|
-      FileUtils.chown_R(config['user'], config['group'], file, :verbose => true)
-      FileUtils.chmod_R(perms, file, :verbose => true)
+  def initialize(time, mode)
+    @time = time
+    case mode
+    when Hash
+      @dir      = mode['dir']
+      @file     = mode['file']
+      @group    = mode['group']
+      @excludes = mode['excludes']
+      @includes = mode['includes']
+    when String
+      @dir  = mode
+      @file = mode
     end
   end
 
-  # Filter out keys that are reserved words or those that have values which are
-  # not hashes
-  clean = config.select do |k, v|
-    !is_reserved?(k) && v.is_a?(Hash)
+  def <=>(other)
+    time <=> other.time
   end
 
-  # Process any sub-paths
-  clean.each do |path, nconfig|
-    # Propagate configurations for reserved words to sub-paths
-    reserved.each do |k|
-      nconfig[k] ||= config[k]
+  def valid?
+    (time - now.gmt_offset) <= now
+  end
+
+  def mode(fullpath)
+    File.directory?(fullpath) ? dir : file
+  end
+
+  private
+
+  attr_reader :dir
+  attr_reader :file
+end
+
+# Path class
+class Path
+  def initialize(config, fullpath = '', parent = nil)
+    # record arguments
+    %i[config fullpath parent].each do |s|
+      instance_variable_set("@#{s}", binding.local_variable_get(s))
     end
 
-    # Recurse to sub-paths
-    process(nconfig, "#{fullpath}#{path}")
+    # populate instance variables in specific order
+    %i[group excludes includes policy path].each do |s|
+      instance_variable_set("@#{s}", send(s))
+    end
+  end
+
+  def apply
+    (path + children).each(&:apply)
+
+    return if fullpath.empty?
+
+    FileUtils.chmod(mode, fullpath, verbose: true)
+
+    return if group.empty?
+
+    FileUtils.chown(nil, group, fullpath, verbose: true)
+  end
+
+  protected
+
+  attr_reader :fullpath
+
+  def mode
+    p = policy.max
+    p = policy.min if excluded? || !p.valid?
+    p.mode(fullpath)
+  end
+
+  def group
+    return @group unless @group.nil?
+
+    @group = @config.delete('group') || @parent&.group || ''
+  end
+
+  def dir_children(fullpath)
+    Dir.exist?(fullpath) ? Dir.children(fullpath) : []
+  end
+
+  def children
+    return @children unless @children.nil?
+
+    @children = dir_children(fullpath).map do |c|
+      cpath = File.join(fullpath, c)
+      Path.new(@config, cpath, self) unless path?(cpath)
+    end.compact
+  end
+
+  def path?(fullpath)
+    path.any? { |p| p.fullpath.eql?(fullpath) }
+  end
+
+  def path
+    return @path unless @path.nil?
+
+    @path = @config.map do |k, v|
+      Path.new(v, File.join(fullpath, k), self) if k.is_a?(String)
+    end.compact
+  end
+
+  def policy
+    return @policy unless @policy.nil?
+
+    @policy = if @config['mode']
+                [Policy.new(Time.at(0), @config.delete('mode'))]
+              else
+                @parent&.policy.clone || []
+              end
+
+    @policy.concat(@config.map do |k, v|
+      Policy.new(k, v) if k.is_a?(Time)
+    end.compact)
+  end
+
+  def excludes
+    return @excludes unless @excludes.nil?
+
+    @excludes = @parent&.excludes.clone || []
+
+    @excludes.concat(@config.delete('exclude')&.map do |e|
+      Dir.glob(File.join(fullpath, e))
+    end&.flatten || [])
+  end
+
+  def includes
+    return @includes unless @includes.nil?
+
+    @includes = @parent&.includes.clone || []
+
+    @includes.concat(@config.delete('include')&.map do |i|
+      Dir.glob(File.join(fullpath, i))
+    end&.flatten || [])
+  end
+
+  private
+
+  def excluded?
+    excludes.include?(fullpath) && !included?
+  end
+
+  def included?
+    includes.include?(fullpath)
   end
 end
 
 # Start processing
-process(YAML.load_file(ARGV[0]))
+begin
+  Path.new(YAML.load_file(ARGV[0] + '/_watchdog.yml')).apply
+rescue ArgumentError => e
+  puts e.message
+rescue Errno::ENOENT => e
+  puts e.message
+end

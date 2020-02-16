@@ -17,7 +17,7 @@ test-$lang() {
   assertTrue \$?
 
   # execute release
-  $bindir/watchdog $builddir/_watchdog.yml
+  $bindir/watchdog $builddir
   assertTrue \$?
 
   # recursively query file permissions

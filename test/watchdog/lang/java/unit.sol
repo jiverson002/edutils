@@ -1,5 +1,5 @@
 drwxr-xr-x ./
-drwx------ ../
+drwxr-xr-x ../
 -rw-r--r-- Code.class
 -rw-r--r-- Code.java
 drwxr-xr-x solution/
