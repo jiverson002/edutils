@@ -9,10 +9,12 @@ addons:
   apt:
     packages:
       - pandoc
+      - rubocop
       - texlive-xetex
   homebrew:
     packages:
       - pandoc
+      - rubocop
     casks:
       - basictex
 
@@ -52,6 +54,8 @@ matrix:
     # Exclude osx jobs where PATH is not updated
     - os: osx
       env:
+
+install: gem install rubocop
 
 script:
   - mkdir build
