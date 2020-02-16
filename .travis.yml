@@ -9,12 +9,10 @@ addons:
   apt:
     packages:
       - pandoc
-      - rubocop
       - texlive-xetex
   homebrew:
     packages:
       - pandoc
-      - rubocop
     casks:
       - basictex
 
