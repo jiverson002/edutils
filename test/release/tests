@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# correct permissions on language directory
+chmod go= $testdir/lang
+
 # dynamically generate a function for each test in lang
 for langdir in $testdir/lang/* ; do
   lang=$(basename $langdir)
