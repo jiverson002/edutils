@@ -1,27 +1,11 @@
 # Tell Travis the project language.
-language: c
+language: generic
 
 # Route to the container-based infrastructure for a faster build.
 sudo: false
 
-# Install dependencies.
-addons:
-  apt:
-    packages:
-      - pandoc
-      - texlive-xetex
-  homebrew:
-    packages:
-      - pandoc
-    casks:
-      - basictex
-
-# Configure caching of Homebrew packages.
-before_cache:
-    - if [[ "$TRAVIS_OS_NAME" == "osx" ]] ; then brew cleanup ; fi
-cache:
-  directories:
-    - $HOME/Library/Caches/Homebrew
+# Enable caching the bundle between builds.
+cache: bundler
 
 # Branch whitelist.
 branches:
@@ -38,22 +22,8 @@ compiler:
   - clang
   - gcc
 
-# HACK: Update the PATH environment variable for osx runs
-env:
-  -
-  - PATH=$PATH:/Library/TeX/texbin
-
-# HACK: fix up the build matrix
-matrix:
-  exclude:
-    # Exclude linux jobs where PATH is updated
-    - os: linux
-      env: PATH=$PATH:/Library/TeX/texbin
-    # Exclude osx jobs where PATH is not updated
-    - os: osx
-      env:
-
-install: gem install rubocop
+install:
+  - bundle install
 
 script:
   - mkdir build

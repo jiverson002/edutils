@@ -17,7 +17,7 @@ test-$lang() {
   assertTrue \$?
 
   # execute release
-  $bindir/watchdog $builddir
+  @BUNDLE_EXE@ exec $bindir/watchdog $srcdir
   assertTrue \$?
 
   # recursively query file permissions
@@ -38,10 +38,8 @@ EOF
   suite_addTest test-$lang
 done
 
-if [ -z "@RUBOCOP_EXE@" ] ; then
-  test-rubocop() {
-    @RUBOCOP_EXE@ $bindir/watchdog
-  }
+test-rubocop() {
+  @BUNDLE_EXE@ exec rubocop $bindir/watchdog
+}
 
-  suite_addTest test-rubocop
-fi
+suite_addTest test-rubocop

@@ -2,6 +2,30 @@
 
 # frozen_string_literal: true
 
+################################################################################
+# MIT License
+#
+# Copyright (c) 2019 Jeremy Iverson
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+################################################################################
+
 require 'fileutils'
 require 'yaml'
 
@@ -63,11 +87,6 @@ module FileUtils
 end
 # rubocop:enable all
 
-# ...
-def now
-  @now ||= Time.now
-end
-
 # Policy class
 class Policy
   include Comparable
@@ -76,8 +95,8 @@ class Policy
     @time = time
     case mode
     when Hash
-      @dir      = mode['dir']
-      @file     = mode['file']
+      @dir  = mode['dir']
+      @file = mode['file']
     when String
       @dir  = mode
       @file = mode
@@ -108,7 +127,7 @@ end
 
 # Path class
 class Path
-  def initialize(config, fullpath = '', parent = nil)
+  def initialize(config, fullpath, parent = nil)
     # record arguments
     %i[config fullpath parent].each do |s|
       instance_variable_set("@#{s}", binding.local_variable_get(s))
@@ -123,7 +142,7 @@ class Path
   def apply
     (path + children).each(&:apply)
 
-    return if fullpath.empty?
+    return if @parent.nil?
 
     FileUtils.chmod(mode, fullpath, verbose: true)
 
@@ -188,7 +207,7 @@ class Path
   end
 
   def dir_children(fullpath)
-    Dir.exist?(fullpath) ? Dir.children(fullpath) : []
+    @parent && Dir.exist?(fullpath) ? Dir.children(fullpath) : []
   end
 
   def path?(fullpath)
@@ -204,9 +223,14 @@ class Path
   end
 end
 
+# ...
+def now
+  @now ||= Time.now
+end
+
 # Start processing
 begin
-  Path.new(YAML.load_file(File.join(ARGV[0], '_watchdog.yml'))).apply
+  Path.new(YAML.load_file(File.join(ARGV[0], '_watchdog.yml')), ARGV[0]).apply
 rescue ArgumentError => e
   puts e.message
 rescue Errno::ENOENT => e

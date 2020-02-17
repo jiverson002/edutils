@@ -1,4 +1,4 @@
-@CMAKE_CURRENT_SOURCE_DIR@/watchdog/lang:
+lang:
   mode: go=,g+rX
   2000-01-01 00:00:00: &stu go=,g+rX,o+rX
 
