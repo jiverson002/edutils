@@ -1,0 +1,32 @@
+#!/bin/bash
+
+# https://stackoverflow.com/a/246128
+bash_source="${BASH_SOURCE[0]}"
+while [ -h "$base_source" ]; do
+  scriptdir="$( cd -P "$( dirname "$bash_source" )" >/dev/null 2>&1 && pwd )"
+  bash_source="$(readlink "$bash_source")"
+  [[ $bash_source != /* ]] && bash_source="$scriptdir/$bash_source"
+done
+scriptdir="$( cd -P "$( dirname "$bash_source" )" >/dev/null 2>&1 && pwd )"
+
+. $scriptdir/common
+
+# project directories
+projectdir="$scriptdir/.."
+depdir="$projectdir/dep"
+srcdir="$projectdir/src"
+testdir="$projectdir/test/watchdog"
+
+# check that required files exist with correct permissions
+try test -r $testdir/tests
+try test -x $depdir/shunit2/shunit2
+
+# HACK: req'd since shunit2 does not appear to find dynamically created
+# functions.
+suite() {
+  # load test functions
+  . $testdir/tests
+}
+
+# initiate the test runner
+. $depdir/shunit2/shunit2

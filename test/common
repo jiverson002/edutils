@@ -1,0 +1,4 @@
+# https://stackoverflow.com/a/25515370
+yell() { echo "$0: $*" >&2; }
+die() { yell "$*"; exit 1; }
+try() { "$@" || die "cannot $*"; }

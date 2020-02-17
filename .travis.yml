@@ -1,6 +1,3 @@
-# Tell Travis the project language.
-language: generic
-
 # Route to the container-based infrastructure for a faster build.
 sudo: false
 
@@ -16,14 +13,6 @@ branches:
 os:
   - linux
   - osx
-
-# Choose compilers.
-compiler:
-  - clang
-  - gcc
-
-install:
-  - bundle install
 
 script:
   - mkdir build

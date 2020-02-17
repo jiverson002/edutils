@@ -1,10 +1,7 @@
 #!/bin/bash
 
-# correct permissions on language directory
-chmod go= $srcdir/lang
-
 # dynamically generate a function for each test in lang
-for langdir in $srcdir/lang/* ; do
+for langdir in $testdir/lang/* ; do
   lang=$(basename $langdir)
 
   for level in prelab lab solution ; do
@@ -18,7 +15,7 @@ test-$lang-$level() {
   assertTrue \$?
 
   # execute release
-  $bindir/release --$level --suffix=.$lang $langdir
+  $srcdir/release --$level --suffix=.$lang $langdir
   assertTrue \$?
 
   # recursively query file permissions

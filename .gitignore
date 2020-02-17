@@ -9,6 +9,3 @@ Gemfile.lock
 # yard files
 .yardoc
 doc
-
-# cmake files
-build
