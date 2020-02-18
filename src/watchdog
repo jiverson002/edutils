@@ -213,7 +213,7 @@ class Path
   def children
     @children ||= dir_children(fullpath).map do |c|
       cpath = File.join(fullpath, c)
-      Path.new(@config, cpath, self) unless path?(cpath)
+      Path.new({}, cpath, self) unless path?(cpath)
     end.compact
   end
 
