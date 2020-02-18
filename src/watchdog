@@ -230,7 +230,7 @@ class Path
   def chown?(_user, group, filepath)
     return if group.empty?
 
-    Etc.getgrnam(group).gid == File.stat(filepath).gid
+    Etc.getgrnam(group).gid != File.stat(filepath).gid
   end
 
   def path?(fullpath)
