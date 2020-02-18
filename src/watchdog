@@ -147,7 +147,6 @@ class Path
 
     chmod(mode, fullpath)
     chown(nil, group, fullpath)
-    chmod?(mode, fullpath)
   end
 
   protected
@@ -177,7 +176,12 @@ class Path
   def excludes
     @excludes ||= (@parent&.excludes.clone || []).tap do |list|
       list.concat(@config.delete('exclude')&.map do |e|
-        Dir.glob(File.join(fullpath, e))
+        pattern = File.join(fullpath, e)
+        if Dir.exist?(pattern)
+          Dir.glob(pattern + '/**/*').push(pattern)
+        else
+          Dir.glob(pattern)
+        end
       end&.flatten || [])
     end
   end
@@ -185,7 +189,12 @@ class Path
   def includes
     @includes ||= (@parent&.includes.clone || []).tap do |list|
       list.concat(@config.delete('include')&.map do |i|
-        Dir.glob(File.join(fullpath, i))
+        pattern = File.join(fullpath, i)
+        if Dir.exist?(pattern)
+          Dir.glob(pattern + '/**/*').push(pattern)
+        else
+          Dir.glob(pattern)
+        end
       end&.flatten || [])
     end
   end
