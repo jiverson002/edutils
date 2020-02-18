@@ -36,7 +36,7 @@ EOF
 done
 
 test-rubocop() {
-  bundle exec rubocop $srcdir/watchdog
+  bundle exec rubocop --cache false $srcdir/watchdog
 }
 
 suite_addTest test-rubocop

@@ -26,6 +26,7 @@
 # SOFTWARE.
 ################################################################################
 
+require 'etc'
 require 'fileutils'
 require 'yaml'
 
@@ -144,11 +145,9 @@ class Path
 
     return if @parent.nil?
 
-    FileUtils.chmod(mode, fullpath, verbose: true)
-
-    return if group.empty?
-
-    FileUtils.chown(nil, group, fullpath, verbose: true)
+    chmod(mode, fullpath)
+    chown(nil, group, fullpath)
+    chmod?(mode, fullpath)
   end
 
   protected
@@ -193,6 +192,18 @@ class Path
 
   private
 
+  def chmod(mode, fullpath)
+    return unless chmod?(mode, fullpath)
+
+    FileUtils.chmod(mode, fullpath, verbose: true)
+  end
+
+  def chown(user, group, fullpath)
+    return unless chown?(user, group, fullpath)
+
+    FileUtils.chown(nil, group, fullpath, verbose: true)
+  end
+
   def path
     @path ||= @config.map do |k, v|
       Path.new(v, File.join(fullpath, k), self) if k.is_a?(String)
@@ -208,6 +219,18 @@ class Path
 
   def dir_children(fullpath)
     @parent && Dir.exist?(fullpath) ? Dir.children(fullpath) : []
+  end
+
+  def chmod?(mode, filepath)
+    smode = File.stat(filepath).mode & 0o07777
+    imode = FileUtils.send(:symbolic_modes_to_i, mode, filepath)
+    smode != imode
+  end
+
+  def chown?(_user, group, filepath)
+    return if group.empty?
+
+    Etc.getgrnam(group).gid == File.stat(filepath).gid
   end
 
   def path?(fullpath)
