@@ -1,5 +1,5 @@
-# Route to the container-based infrastructure for a faster build.
-sudo: false
+# Tell Travis the project language.
+language: ruby
 
 # Enable caching the bundle between builds.
 cache: bundler
