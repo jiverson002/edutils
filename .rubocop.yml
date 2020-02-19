@@ -1,0 +1,12 @@
+# Common configuration.
+AllCops:
+  # Include common Ruby source files.
+  Include:
+    - lib/*.rb
+  # Exclude Ruby source files.
+  Exclude:
+    - lib/monkey.rb
+    - bin/**/*
+    - spec/**/*
+    - src/**/*
+    - vendor/bundle/**/*

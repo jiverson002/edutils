@@ -1,0 +1,6 @@
+#!/usr/bin/env ruby -w
+# frozen_string_literal: true
+
+require 'watchdog'
+
+Watchdog::Path.new(YAML.load_file(File.join(ARGV[0], '_watchdog.yml')), ARGV[0]).apply

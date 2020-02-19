@@ -2,13 +2,15 @@
 
 source 'https://rubygems.org'
 
+# group :runtime
 gem 'rake'
 
 group :doc do
-  gem 'rubocop'
   #gem 'yard'
 end
 
-#group :test do
-#  gem 'rspec'
-#end
+group :test do
+  gem 'rspec'
+  gem 'rubocop'
+  gem 'simplecov'
+end

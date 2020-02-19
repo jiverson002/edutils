@@ -1,0 +1,17 @@
+lang: 0755
+lang/cpp: 0750
+lang/cpp/solution: 0755
+lang/cpp/solution/solution.cpp: 0644
+lang/cpp/solution/solution.o: 0644
+lang/cpp/code.o: 0640
+lang/cpp/code.cpp: 0640
+lang/java: 0755
+lang/java/solution: 0755
+lang/java/solution/Solution.java: 0640
+lang/java/solution/Solution.class: 0644
+lang/java/Code.class: 0644
+lang/java/Code.java: 0644
+lang/sh: 0755
+lang/sh/solution: 0755
+lang/sh/solution/solution.sh: 0751
+lang/sh/code.sh: 0755

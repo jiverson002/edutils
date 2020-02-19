@@ -9,3 +9,6 @@ Gemfile.lock
 # yard files
 .yardoc
 doc
+
+# simplecov files
+coverage

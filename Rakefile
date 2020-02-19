@@ -1,9 +1,11 @@
-task default: %w[release_test watchdog_test]
+begin
+  task :default => [:rspec, :rubocop]
 
-task :release_test do
-  sh 'test/release.test'
-end
+  require 'rspec/core/rake_task'
+  RSpec::Core::RakeTask.new(:rspec)
 
-task :watchdog_test do
-  sh 'test/watchdog.test'
+  require 'rubocop/rake_task'
+  RuboCop::RakeTask.new(:rubocop)
+rescue LoadError
+  # no rspec or rubocop available
 end
