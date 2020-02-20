@@ -3,9 +3,9 @@ SimpleCov.start do
   add_filter "monkey.rb"
 end
 
-require 'watchdog'
+require 'edutils/watchdog'
 
-RSpec.describe Watchdog do
+RSpec.describe EDUtils::Watchdog do
   describe '#apply' do
     context 'multiple directories' do
       let(:base)     { 'watchdog'}
@@ -13,7 +13,7 @@ RSpec.describe Watchdog do
       let(:expected) { yml_fixture("#{base}/expected.yml") }
 
       it 'produces expected output' do
-        Watchdog::Path.new(config, fixture_path(base)).apply
+        EDUtils::Watchdog::Path.new(config, fixture_path(base)).apply
 
         Dir.glob("**/*", base: fixture_path(base)).each do |path|
           next if path.eql?('_watchdog.yml') || path.eql?('expected.yml')

@@ -3,14 +3,15 @@
 source 'https://rubygems.org'
 
 # group :runtime
-gem 'rake'
+gemspec
 
 group :doc do
-  #gem 'yard'
+  #gem 'yard', '~>0'
 end
 
 group :test do
-  gem 'rspec'
-  gem 'rubocop'
-  gem 'simplecov'
+  gem 'rake', '~>13'
+  gem 'rspec', '~>3'
+  gem 'rubocop', '~>0'
+  gem 'simplecov', '~>0'
 end

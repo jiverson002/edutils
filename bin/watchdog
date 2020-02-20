@@ -1,6 +1,10 @@
 #!/usr/bin/env ruby -w
 # frozen_string_literal: true
 
-require 'watchdog'
+require 'safe_yaml/load'
 
-Watchdog::Path.new(YAML.load_file(File.join(ARGV[0], '_watchdog.yml')), ARGV[0]).apply
+require 'edutils/watchdog'
+
+SafeYAML.load_file(File.join(ARGV[0], '_watchdog.yml')).tap do |config|
+  EDUtils::Watchdog::Path.new(config, ARGV[0]).apply
+end
